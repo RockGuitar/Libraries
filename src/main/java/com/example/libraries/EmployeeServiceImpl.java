@@ -1,5 +1,11 @@
 package com.example.libraries;
 
+import EmployeeClass.Employee;
+import EmployeeErrors.EmployeeAlreadyExists;
+import EmployeeErrors.EmployeeNotFound;
+import EmployeeErrors.EmployeeWrongName;
+import EmployeeServices.EmployeeService2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -16,39 +22,55 @@ public class EmployeeServiceImpl implements EmployeeService2 {
 
     @Override
     public void removeEmployee ( String firstName, String lastName) {
-        String oldEmployeeFullName = firstName + " " + lastName;
-        boolean found = false;
-        if(employeeMap.containsKey(oldEmployeeFullName)){
-            found = true;
-            employeeMap.remove(oldEmployeeFullName);
-            System.out.println("Сотрудник " + oldEmployeeFullName + " удален");
-        }
-        if (!found){
-            throw new EmployeeNotFound();
+        if (StringUtils.isAlpha(firstName) & StringUtils.isAlpha(lastName)) {
+            String oldEmployeeFullName = StringUtils.capitalize(firstName) + " " + StringUtils.capitalize(lastName);
+            boolean found = false;
+            if(employeeMap.containsKey(oldEmployeeFullName)){
+                found = true;
+                employeeMap.remove(oldEmployeeFullName);
+                System.out.println("Сотрудник " + oldEmployeeFullName + " удален");
+            }
+            if (!found){
+                throw new EmployeeNotFound();
+            }
+        }else{
+            throw new EmployeeWrongName();
         }
     }
     @Override
     public void findEmployee ( String firstName, String lastName ) {
-        String requestedEmployeeFullName = firstName + " " + lastName;
-        boolean found = false;
-        if (employeeMap.containsKey(requestedEmployeeFullName)) {
-            found = true;
-            System.out.println("Сотрудник " + requestedEmployeeFullName + " находится в базе данных");
-        }
-        if(!found){
-            throw new EmployeeNotFound();
+        if (StringUtils.isAlpha(firstName) & StringUtils.isAlpha(lastName)) {
+            String requestedEmployeeFullName = StringUtils.capitalize(firstName) + " " + StringUtils.capitalize(lastName);
+            boolean found = false;
+            if (employeeMap.containsKey(requestedEmployeeFullName)) {
+                found = true;
+                System.out.println("Сотрудник " + requestedEmployeeFullName + " находится в базе данных");
+            }
+            if (!found) {
+                throw new EmployeeNotFound();
+            }
+        }else{
+            throw new EmployeeWrongName();
         }
     }
 
     public void addEmployee(String firstName, String lastName, int employeeDepartment, int employeePayment){
-        Employee newEmployee = new Employee(firstName, lastName,employeeDepartment, employeePayment);
-        String newEmployeeFullName = firstName + " " + lastName;
-        if(employeeMap.containsKey(newEmployeeFullName)){
-            throw new EmployeeAlreadyExists();
+        if(StringUtils.isAlpha(firstName) & StringUtils.isAlpha(lastName)){
+            Employee newEmployee = new Employee(
+                    StringUtils.capitalize(firstName),
+                    StringUtils.capitalize(lastName),
+                    employeeDepartment,
+                    employeePayment);
+            String newEmployeeFullName = StringUtils.capitalize(firstName) + " " + StringUtils.capitalize(lastName);
+            if(employeeMap.containsKey(newEmployeeFullName)){
+                throw new EmployeeAlreadyExists();
+            }else{
+                employeeMap.put(newEmployeeFullName,newEmployee);
+                System.out.println("Сотрудник " + newEmployee.getEmployeeFirstName() + " "
+                        + newEmployee.getEmployeeLastName() + " добавлен");
+            }
         }else{
-            employeeMap.put(newEmployeeFullName,newEmployee);
-            System.out.println("Сотрудник " + newEmployee.getEmployeeFirstName() + " "
-                    + newEmployee.getEmployeeLastName() + " добавлен");
+            throw new EmployeeWrongName();
         }
     }
 
